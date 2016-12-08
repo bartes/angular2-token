@@ -92,4 +92,5 @@ export interface Angular2TokenOptions {
     oAuthWindowOptions?:        { [key:string]: string; };
 
     globalOptions?:             GlobalOptions;
+    storageKey?:                string;
 }
