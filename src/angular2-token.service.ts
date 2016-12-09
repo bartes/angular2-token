@@ -50,13 +50,7 @@ export class Angular2TokenService implements CanActivate {
 
     get currentAuthHeaders(): Headers {
         if (this.atCurrentAuthData != null) {
-            return new Headers({
-                'access-token': this.atCurrentAuthData.accessToken,
-                'client':       this.atCurrentAuthData.client,
-                'expiry':       this.atCurrentAuthData.expiry,
-                'token-type':   this.atCurrentAuthData.tokenType,
-                'uid':          this.atCurrentAuthData.uid
-            });
+            return new Headers(this._prepareData(this.atCurrentAuthData));
         }
 
         return new Headers;
@@ -382,13 +376,7 @@ export class Angular2TokenService implements CanActivate {
         
         // Merge auth headers to request if set
         if (this.atCurrentAuthData != null) {
-            (<any>Object).assign(baseHeaders, {
-                'access-token': this.atCurrentAuthData.accessToken,
-                'client':       this.atCurrentAuthData.client,
-                'expiry':       this.atCurrentAuthData.expiry,
-                'token-type':   this.atCurrentAuthData.tokenType,
-                'uid':          this.atCurrentAuthData.uid
-            });
+          this._prepareData(this.atCurrentAuthData, baseHeaders);
         }
 
         baseRequestOptions = new RequestOptions({
@@ -478,9 +466,9 @@ export class Angular2TokenService implements CanActivate {
     private getAuthDataFromStorage(): void {
         let authDataFromStorage;
 
-        if (this._options.storageKey) {
+        if (this.atOptions.storageKey) {
           authDataFromStorage = JSON.parse(
-            localStorage.getItem(this._options.storageKey) || '{}'
+            localStorage.getItem(this.atOptions.storageKey) || '{}'
           );
         } else {
           authDataFromStorage = localStorage;
@@ -521,8 +509,11 @@ export class Angular2TokenService implements CanActivate {
      *
      */
 
-    private _dasherize(data: any) {
-      return (<any>Object).assign({}, {
+    private _prepareData(data: any, mergeWith = {}) {
+      if(!data) {
+        return {};
+      }
+      return (<any>Object).assign(mergeWith, {
         'access-token': data.accessToken,
         'client':       data.client,
         'expiry':       data.expiry,
@@ -538,9 +529,9 @@ export class Angular2TokenService implements CanActivate {
 
             this.atCurrentAuthData = authData;
 
-            if (this._options.storageKey) {
+            if (this.atOptions.storageKey) {
               localStorage.setItem(
-                this._options.storageKey, JSON.stringify(this._dasherize(authData))
+                this.atOptions.storageKey, JSON.stringify(this._prepareData(authData))
               );
             } else {
               localStorage.setItem('access-token', authData.accessToken);
